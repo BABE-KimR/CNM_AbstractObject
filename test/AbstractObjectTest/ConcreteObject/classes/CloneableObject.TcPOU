@@ -1,0 +1,105 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.8">
+  <POU Name="CloneableObject" Id="{bc4d8256-4625-48c0-9ff0-8280f356c466}" SpecialFunc="None">
+    <Declaration><![CDATA[{attribute 'enable_dynamic_creation'}
+FUNCTION_BLOCK CloneableObject EXTENDS CNM_AbstractObject.Object
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Property Name="className" Id="{7a56ad3f-f3bd-41cb-b391-58d8831b6d94}">
+      <Declaration><![CDATA[PROPERTY className :CNM_AbstractObject.ClassName]]></Declaration>
+      <Get Name="Get" Id="{011f0caf-a151-46de-98f6-0d285258f62c}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[className := 'CloneableObject';]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="clone" Id="{f36c1224-5dda-4b6c-a58a-290bed6db43e}">
+      <Declaration><![CDATA[(*
+
+short summary
+=================
+This method is used to create a new instance
+of the object which has the same internal state as the object.
+If the object is a container class, the references to the content objects
+are not cloned for this there is the method :ref:`ICloneable.deepClone`.
+
+If an object does not support cloning the return value is
+``CNM_ReturnTypes.CloneResult.CLONE_IS_NOT_SUPPORTED``.
+
+If there is not enough memory or the cloning fails because the
+attribute enable dynamic creation was forgotten the return value is 
+``CNM_ReturnTypes.CloneResult.FAILED``.
+
+Only if the return value is ``CNM_ReturnTypes.CloneResult.SUCCESS``
+the output ``clonedObject`` points to the new object
+otherwise ``clonedObject`` is NULL.  
+
+.. attention:: 
+	For derivations: **If a derived class needs ``clone`` this method must be overwritten.**
+	and don't forget the attribute ``{attribute 'enable_dynamic_creation'}``  
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+parameters
+=================
+:return:``CNM_ReturnTypes.CloneResult.SUCCESS``: new object clone was created,
+``CNM_ReturnTypes.CloneResult.FAILED``: object clone failed
+``CNM_ReturnTypes.CloneResult.CLONE_IS_NOT_SUPPORTED``: object does not support cloning
+
+*)
+
+METHOD clone :CNM_ReturnTypes.CloneResult
+VAR_OUTPUT
+	(* new object instance or NULL if somthing went wrong *)
+	clonedObject	:CNM_AbstractObject.IObject;
+END_VAR
+VAR
+	new			:POINTER TO CloneableObject;
+	cloneName	:CNM_AbstractObject.ObjectName;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[clonedObject := 0;
+clone := CNM_ReturnTypes.CloneResult.FAILED;
+cloneName := CONCAT('clone of ', THIS^.objectName);
+new := __NEW(CloneableObject());
+RETURN(new = 0);
+clonedObject := new^;
+clone := CNM_ReturnTypes.CloneResult.SUCCESS;
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="CloneableObject">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="CloneableObject.className.Get">
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="CloneableObject.clone">
+      <LineId Id="55" Count="1" />
+      <LineId Id="58" Count="0" />
+      <LineId Id="51" Count="0" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="60" Count="1" />
+      <LineId Id="57" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

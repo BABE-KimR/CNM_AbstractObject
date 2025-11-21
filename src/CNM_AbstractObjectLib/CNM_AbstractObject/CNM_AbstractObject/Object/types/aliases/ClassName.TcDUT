@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.10">
+  <DUT Name="ClassName" Id="{b367cb0a-a79d-4931-a187-df1c0fa86593}">
+    <Declaration><![CDATA[(*
+
+## Short summary
+
+ClassName is an alias of ``Tc2_System.T_MaxString``
+It's used as return of the property :ref:`IObject.className` 
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+
+TYPE 
+	ClassName :Tc2_System.T_MaxString;
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,84 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.8">
+  <POU Name="StupidObject" Id="{1b4c2a4b-52e9-4505-a133-a544da09015e}" SpecialFunc="None">
+    <Declaration><![CDATA[(*
+
+short summary
+=================
+This is a useless object for some test with stack objects.
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2024 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+methods and properties
+=========================
+
+*)
+
+FUNCTION_BLOCK INTERNAL StupidObject EXTENDS CNM_AbstractObject.Object IMPLEMENTS IStupidObject4
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Property Name="className" Id="{4b505fd9-6b6c-4889-9d5b-16a2d5a20aeb}">
+      <Declaration><![CDATA[(*
+
+short summary
+=================
+This abstract property returns the class name of the concrete object, 
+which is useful for logging/debugging purpose or to check the class name for 
+``__DELETE`` in factories (sometimes it's necessary to do more 
+than just to free the memory).
+
+.. attention:: 
+	For derivations: **It is necessary that this property is overridden by the concrete class**
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+
+PROPERTY className :CNM_AbstractObject.ClassName]]></Declaration>
+      <Get Name="Get" Id="{d2c7670f-624c-409a-b6c7-a4fd4954d739}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[className := 'StupidObject';
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <LineIds Name="StupidObject">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="StupidObject.className.Get">
+      <LineId Id="2" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

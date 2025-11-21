@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Refactors>
+  <Renames>
+    <RenamedType>
+      <Type guid="1d604bea-df5e-43e9-a4ce-4d9e9265b1d5">PARAMETERS</Type>
+      <From>Parameters</From>
+      <To>GeneralParameters</To>
+    </RenamedType>
+  </Renames>
+</Refactors>

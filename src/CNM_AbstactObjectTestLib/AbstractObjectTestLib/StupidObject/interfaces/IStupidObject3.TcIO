@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <Itf Name="IStupidObject3" Id="{f8366c68-456d-4b40-8277-e3d6b80a9e0a}">
+    <Declaration><![CDATA[(*
+
+short summary
+=================
+This is a useless interface for the validity test.
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2024 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+
+INTERFACE INTERNAL IStupidObject3 EXTENDS CNM_AbstractObject.IObject
+]]></Declaration>
+  </Itf>
+</TcPlcObject>

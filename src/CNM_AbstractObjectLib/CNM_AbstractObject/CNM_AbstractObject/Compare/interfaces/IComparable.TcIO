@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.8">
+  <Itf Name="IComparable" Id="{da2384b8-6baf-4ae5-8724-6db0c711add5}">
+    <Declaration><![CDATA[(*
+
+## Short summary
+
+This interface is used to make objects comparable in order to be able to sort them.
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+
+
+*)
+
+INTERFACE IComparable EXTENDS __SYSTEM.IQueryInterface
+]]></Declaration>
+    <Method Name="compareTo" Id="{b998b27f-a444-40e4-afa9-9931b6b731bd}">
+      <Declaration><![CDATA[(*
+
+## Short summary
+
+This method compares a foreign object with the own one, this is needed for sort orders.
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+
+**Return:**``SMALLER``: ``THIS`` precedes in order,
+``EQUAL``: ``THIS`` and ``object`` at the same position in order,
+``GREATER``: ``THIS`` is after in order.
+
+*)
+
+METHOD compareTo :CNM_ReturnTypes.ComparationResult
+VAR_INPUT
+	(* foreign objet to compare*)
+	object	:IObject;
+END_VAR
+]]></Declaration>
+    </Method>
+  </Itf>
+</TcPlcObject>

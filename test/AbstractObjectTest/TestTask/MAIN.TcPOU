@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.8">
+  <POU Name="MAIN" Id="{26c9b063-f91b-4120-9881-7c8834d3b49b}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MAIN
+VAR
+	cloneableObject			:CloneableObject();
+	nonCloneableObject		:ConcreteObject();
+	objectTest 				:AbstractObject_Test(cloneableObject, nonCloneableObject);
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[TcUnit.RUN_IN_SEQUENCE();
+]]></ST>
+    </Implementation>
+    <LineIds Name="MAIN">
+      <LineId Id="31" Count="0" />
+      <LineId Id="13" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

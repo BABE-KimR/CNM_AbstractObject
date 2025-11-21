@@ -1,0 +1,799 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.8">
+  <POU Name="Object" Id="{2941d2f5-06fc-476d-bfbd-1ac799790b91}" SpecialFunc="None">
+    <Declaration><![CDATA[(*
+
+## Short summary
+
+This is an abstract class that implements the interface :ref:`IObject`. 
+Every cinnamon class must implement the interface :ref:`IObject`.
+To simplify this there is this abstract class to simply derive from it.
+This makes it possible to keep different classes very general, such as lists. 
+
+**Attention:**
+	**If another implementation for** ``IObject`` **is used, only the other implementation must be used**,
+	otherwise one runs the risk that the hash code is no longer unique. 
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+
+
+*)
+
+{attribute 'reflection'}
+FUNCTION_BLOCK ABSTRACT Object IMPLEMENTS IObject
+VAR
+	(*unique hashcode of the object instance*)
+	{attribute 'no_copy'}
+	myHashcode	:Hashcode;
+	(*flag for isObjectAlive*)
+	{attribute 'hide'}
+	{attribute 'no_copy'}
+	objectIsAlive :BOOL := TRUE;
+	(*fully qualified name of the object instance*)
+	{attribute 'instance-path'}
+	{attribute 'no_init'}
+	objectName	:ObjectName;
+END_VAR
+VAR_STAT
+	{attribute 'hide'}
+	hashstate1	:Hashcode := 1321861022983091513;
+	{attribute 'hide'}
+	hashstate2	:Hashcode := 3123198108391880477;
+	{attribute 'hide'}
+	hashstate3	:Hashcode := 1451815097307991481;
+	{attribute 'hide'}
+	hashstate4	:Hashcode := 5520930533486498032;
+	{attribute 'hide'}
+	hashLock 	:FB_IecCriticalSection;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Folder Name="IObject" Id="{71673b90-d795-4881-9189-994452e85687}">
+      <Folder Name="ICloneable" Id="{5db62876-8437-45b6-a380-d3487c0ea7de}" />
+      <Folder Name="IComparable" Id="{97cac776-2491-4fad-bb8b-0eefec44bbbb}" />
+    </Folder>
+    <Property Name="address" Id="{3fc5f158-9061-419d-9bfe-6e4f6945d432}" FolderPath="IObject\">
+      <Declaration><![CDATA[(*
+
+## Short summary
+
+This property returns the address of the concrete object, 
+which is from time to time useful.
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+
+PROPERTY FINAL address :__XWORD
+]]></Declaration>
+      <Get Name="Get" Id="{43ecf11c-07b5-4bb7-8888-8513710c732d}">
+        <Declaration><![CDATA[
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[address := THIS;
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="className" Id="{3b7266f6-f743-453e-b7a5-561ccb174747}" FolderPath="IObject\">
+      <Declaration><![CDATA[(*
+
+## Short summary
+
+This abstract property returns the class name of the concrete object, 
+which is useful for debugging purpose.
+
+**Attention:**
+	For derivations: **It is necessary that this property is overridden by the concrete class**
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+
+PROPERTY ABSTRACT className :ClassName
+]]></Declaration>
+      <Get Name="Get" Id="{9b8bc827-1a36-429b-ace3-5822d1173278}">
+        <Declaration><![CDATA[
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="clone" Id="{c89ca298-06dd-4e31-9c1b-d0e929f6ba84}" FolderPath="IObject\ICloneable\">
+      <Declaration><![CDATA[(*
+
+## Short summary
+
+This method is used to create a new instance
+of the object which has the same internal state as the object.
+If the object is a container class, the references to the content objects
+are not cloned for this there is the method :ref:`ICloneable.deepClone`.
+
+If an object does not support cloning the return value is
+``CNM_ReturnTypes.CloneResult.CLONE_IS_NOT_SUPPORTED``.
+
+If there is not enough memory or the cloning fails because the
+attribute enable dynamic creation was forgotten the return value is 
+``CNM_ReturnTypes.CloneResult.FAILED``.
+
+Only if the return value is ``CNM_ReturnTypes.CloneResult.SUCCESS``
+the output ``clonedObject`` points to the new object
+otherwise ``clonedObject`` is NULL.  
+
+**Attention:**
+	For derivations: **If a derived class needs ``clone`` this method must be overwritten.**
+	and don't forget the attribute ``{attribute 'enable_dynamic_creation'}``  
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+
+**Return:**``CNM_ReturnTypes.CloneResult.SUCCESS``: new object clone was created,
+``CNM_ReturnTypes.CloneResult.FAILED``: object clone failed
+``CNM_ReturnTypes.CloneResult.CLONE_IS_NOT_SUPPORTED``: object does not support cloning
+
+*)
+
+METHOD clone :CNM_ReturnTypes.CloneResult
+VAR_OUTPUT
+	(* new object instance or NULL if somthing went wrong *)
+	clonedObject	:IObject;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[clonedObject	:= 0;
+clone			:= CNM_ReturnTypes.CloneResult.CLONE_IS_NOT_SUPPORTED;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="compareTo" Id="{10586caf-1efe-4e49-99d0-6b69e2c7009c}" FolderPath="IObject\IComparable\">
+      <Declaration><![CDATA[(*
+
+## Short summary
+
+This method compares a foreign object with the own one, this is needed for sort orders.
+The abstract class evaluates every object that is NULL as greater, and all other objects as equal. 
+
+**Attention:**
+	For derivations: **If a derived class needs sorting this method must be overwritten.** 
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+
+**Return:**``SMALLER``: ``THIS`` precedes in order,
+``EQUAL``: ``THIS`` and ``object`` at the same position in order,
+``GREATER``: ``THIS`` is after in order.
+
+*)
+
+METHOD compareTo :CNM_ReturnTypes.ComparationResult
+VAR_INPUT
+	(* foreign objet to compare*)
+	object	:IObject;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF (THIS^.isObjectNull(object)) THEN
+	compareTo := CNM_ReturnTypes.ComparationResult.GREATER;
+ELSE
+	compareTo := CNM_ReturnTypes.ComparationResult.EQUAL;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="deepClone" Id="{16df1001-df3c-4454-910a-40f8b3153b97}" FolderPath="IObject\ICloneable\">
+      <Declaration><![CDATA[(*
+
+## Short summary
+
+This method is used to create a new instance
+of the object which has the same internal state as the object.
+If the object is a container class, the references to the content objects
+are cloned too.
+
+If an object does not support cloning the return value is
+``CNM_ReturnTypes.CloneResult.CLONE_IS_NOT_SUPPORTED``.
+
+If there is not enough memory or the cloning fails because the
+attribute enable dynamic creation was forgotten the return value is 
+``CNM_ReturnTypes.CloneResult.FAILED``.
+If something goes wrong, then this method must clean up everything
+that has been cloned and free the memory again.
+**The deepClone either works completely, or not at all**
+
+Only if the return value is ``CNM_ReturnTypes.CloneResult.SUCCESS``
+the output ``clonedObject`` points to the new object
+otherwise ``clonedObject`` is NULL.  
+
+**Attention:**
+	For derivations: **If a derived class needs ``deepClone`` this method must be overwritten.**
+	and don't forget the attribute ``{attribute 'enable_dynamic_creation'}``, even for container content 
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+
+**Return:**``CNM_ReturnTypes.CloneResult.SUCCESS``: new object clone was created,
+``CNM_ReturnTypes.CloneResult.FAILED``: object clone failed
+``CNM_ReturnTypes.CloneResult.CLONE_IS_NOT_SUPPORTED``: object does not support deep cloning
+
+*)
+
+METHOD deepClone :CNM_ReturnTypes.CloneResult
+VAR_OUTPUT
+	(* new object instance or NULL if somthing went wrong *)
+	clonedObject	:IObject;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[clonedObject	:= 0; 
+deepClone		:= CNM_ReturnTypes.CloneResult.CLONE_IS_NOT_SUPPORTED;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="deepDestruct" Id="{cbd18277-30d2-44f2-850c-06c11260fc08}" FolderPath="IObject\ICloneable\">
+      <Declaration><![CDATA[(*
+
+## Short summary
+
+This method is a self-destruction if the object was created dynamically.
+If the object is a container class, the container content is destroyed with it.
+
+**Attention:**
+	For derivations: **If a derived class needs ``deepDestruct`` this method must be overwritten.**
+	otherwise it just calls :ref:`Object.destruct`. 
+
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+
+METHOD deepDestruct
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[THIS^.destruct();
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="destruct" Id="{94972255-f5e8-4bb9-a935-b5512937bd14}" FolderPath="IObject\ICloneable\">
+      <Declaration><![CDATA[(*
+
+## Short summary
+
+This method is a self-destruction if the object was created dynamically.
+If the object is a container class, the container content is not destroyed with it,
+for that there is the method :ref:`ICloneable.deepDestruct`
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+
+METHOD destruct
+VAR
+	(* __DELETE(THIS) is not allowed anymore in Tc 4026.
+       tmp is just a helper pointer that points to this instance *)
+	tmp : POINTER TO Object;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF (
+	Tc2_System.F_CheckMemoryArea(pData := THIS, nSize := SIZEOF(THIS^))
+	= Tc2_System.E_TcMemoryArea.Dynamic
+) THEN
+	tmp := THIS;
+	__DELETE(tmp);
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="FB_Exit" Id="{33d59c57-640c-4672-98c8-1531845817da}">
+      <Declaration><![CDATA[(*
+
+## Short summary
+
+Mark the object as deleted, as it staiys in the memory.
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+
+METHOD FB_Exit: BOOL
+VAR_INPUT
+	// TRUE: the exit method is called in order to leave the instance which will be copied afterwards (online change).
+    bInCopyCode: BOOL;    
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[THIS^.objectIsAlive := FALSE;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="FB_init" Id="{dcf7c645-1001-448d-845f-dc7d57857a5e}">
+      <Declaration><![CDATA[(*
+
+## Short summary
+
+The constructor ``FB_init`` is needed to create an unique hash code.
+The hash code is a pseudo random number create with a [xorshift](https://en.wikipedia.org/wiki/Xorshift) algorithm.
+It can be overwritten on derivations, because it will be called implicit, ``SUPER^.FB_init()`` is not required.
+For more information check: [Behavoir with derived function blocks](https://infosys.beckhoff.com/content/1033/tc3_plc_intro/5482088715.html?id=6983869892358031022)
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+
+
+*)
+
+METHOD FB_init : BOOL
+VAR_INPUT
+	(* if TRUE, the retain variables are initialized (warm start / cold start)*)
+	bInitRetains	:BOOL;
+	(* if TRUE, the instance afterwards gets moved into the copy code (online change) *)
+	bInCopyCode		:BOOL;  
+END_VAR
+VAR
+	{attribute 'hide'}
+	newHashstate3		:Hashcode;
+END_VAR
+VAR CONSTANT
+	{attribute 'hide'}
+	NUMBER_OF_LEFT_SHIFTS		:UINT	:= 17;
+	{attribute 'hide'}
+	NUMBER_OF_LEFT_ROTATIONS	:UINT   := 45;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[THIS^.hashLock.Enter();
+THIS^.myHashcode	:= (THIS^.hashstate1 + THIS^.hashstate4);
+newHashstate3		:= SHL(THIS^.hashstate1, NUMBER_OF_LEFT_SHIFTS);
+THIS^.hashstate3	:= (THIS^.hashstate3 XOR THIS^.hashstate1);
+THIS^.hashstate4	:= (THIS^.hashstate4 XOR THIS^.hashstate2);
+THIS^.hashstate2	:= (THIS^.hashstate2 XOR THIS^.hashstate3);
+THIS^.hashstate1	:= (THIS^.hashstate1 XOR THIS^.hashstate4);
+THIS^.hashstate3	:= newHashstate3;
+THIS^.hashstate4	:= ROL(THIS^.hashstate4, NUMBER_OF_LEFT_ROTATIONS);
+THIS^.hashLock.Leave();
+THIS^.objectIsAlive := TRUE;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="hashcode" Id="{17ff9aa6-4eb2-48c7-8715-f6806bd6596c}" FolderPath="IObject\">
+      <Declaration><![CDATA[(*
+
+## Short summary
+
+This property returns the unique hash code of the object. 
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+
+PROPERTY FINAL hashcode :Hashcode
+]]></Declaration>
+      <Get Name="Get" Id="{d2b89a37-be73-4f1d-b410-fe8bceacd0cb}">
+        <Declaration><![CDATA[
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[hashcode := THIS^.myHashcode;
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="isEqual" Id="{d4236712-0f77-45a1-9e3a-91d5a52cef0d}" FolderPath="IObject\">
+      <Declaration><![CDATA[(*
+
+## Short summary
+
+This method is used to check if two objects are equal. 
+If the hash code of the objects is identical, then the foreign object is the same.
+
+**Attention:**
+	For derivations: **This method must not be overwritten** 
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+
+**Return:**``FALSE``: foreign object and object are not the same,
+``TRUE``: foreign object and object are the same
+
+*)
+
+METHOD FINAL isEqual :BOOL
+VAR_INPUT
+	(* foreign objet to check*)
+	object	:IObject;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF (THIS^.isObjectValid(object)) THEN
+	isEqual := (object.hashcode = THIS^.hashcode);
+ELSE
+	isEqual := FALSE;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="isObjectAlive" Id="{f51b9151-c189-4cc5-971a-2b3b5eb94010}" FolderPath="IObject\">
+      <Declaration><![CDATA[(*
+
+## Short summary
+
+This property returns true if the object is valid.
+Used for internal reasons inside the isObjectValid method to detect deleted objects as not valid.
+Should not be used for any other reason!
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+
+{attribute 'hide'}
+PROPERTY FINAL isObjectAlive :BOOL
+]]></Declaration>
+      <Get Name="Get" Id="{66aee391-9a98-4537-9e5d-ef2d75356a9d}">
+        <Declaration><![CDATA[]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[isObjectAlive := THIS^.objectIsAlive;
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="isObjectNull" Id="{ff940541-1ac5-4e15-9c20-bab61a494db4}" FolderPath="IObject\">
+      <Declaration><![CDATA[(*
+
+## Short summary
+
+This method is a helper method to check if an object is NULL.
+
+**Attention:**
+	It calls :ref:`Object.isObjectValid`
+	For details please check :ref:`Object.isObjectValid` 
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+
+**Return:**``FALSE``: foreign object is not NULL, ``TRUE``: foreign object is NULL
+
+*)
+
+METHOD  FINAL isObjectNull :BOOL
+VAR_INPUT
+	(* foreign object to check*)
+	object	:IObject;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[isObjectNull := (NOT THIS^.isObjectValid(object));
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="isObjectValid" Id="{d790db15-91c2-40b5-9431-5b438f055978}" FolderPath="IObject\">
+      <Declaration><![CDATA[(*
+
+## Short summary
+
+This method is a helper method to check if an object is valid.
+
+**Attention:**
+	It checks the address of the reference for plausibility,
+	if it looks safe it __TRY's to access ``isObjectAlive`` property.
+	This is done to avoid the catch case which is 100 times slower.
+	Will return FALSE for objects which were __DELETE'd.
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+
+**Return:**``FALSE``: foreign object is not valid, ``TRUE``: foreign object is valid
+
+*)
+
+METHOD FINAL isObjectValid :BOOL
+VAR_INPUT
+	(* foreign object to check*)
+	object	:IObject;
+END_VAR
+VAR
+	{attribute 'displaymode':='hex'}
+	objectAddress	:POINTER TO __XWORD := ADR(object);
+	{attribute 'displaymode':='hex'}
+	stackAddress	:__XWORD;
+END_VAR
+VAR CONSTANT
+	{attribute 'const_replaced'}
+	{attribute 'displaymode':='hex'}
+	NULL :__XWORD := 0;
+	{attribute 'const_replaced'
+	{attribute 'displaymode':='hex'}
+	REGISTER_SIZE :UDINT := SIZEOF(__XWORD);
+	(* 0x400000 is 4096kb and this is the max configurable stack size *)
+	{attribute 'const_replaced'}
+	{attribute 'displaymode':='hex'}
+	MAX_STACK_SIZE :__XWORD := 16#0040_0000;
+END_VAR
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[isObjectValid := FALSE;
+(*try catch is slow for invalid objects, so this should improve performance in that case*)
+RETURN (object = NULL OR_ELSE objectAddress = NULL);
+CASE Tc2_System.F_CheckMemoryArea(pData := objectAddress^, nSize := REGISTER_SIZE) OF
+Tc2_System.E_TcMemoryArea.CNC,
+Tc2_System.E_TcMemoryArea.Dynamic,
+Tc2_System.E_TcMemoryArea.Static:;
+ELSE
+	RETURN (objectAddress^ < ABS(ADR(stackAddress) - MAX_STACK_SIZE));
+END_CASE
+
+__TRY
+	(*isObjectAlive is used for objects that are still in memory but were __DELETEd*)
+	isObjectValid := object.isObjectAlive;
+__CATCH
+	;
+__ENDTRY
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="name" Id="{a66fb19c-5710-456b-9908-77e93469600a}" FolderPath="IObject\">
+      <Declaration><![CDATA[(*
+
+## Short summary
+
+This property returns the full qualified name of the concrete object, 
+which is useful for logging.
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+
+PROPERTY FINAL name :ObjectName
+]]></Declaration>
+      <Get Name="Get" Id="{b41adac5-ce06-45fd-a1b8-5f921d53b93d}">
+        <Declaration><![CDATA[
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[name := THIS^.objectName;
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <ObjectProperties>
+      <XmlArchive>
+        <Data>
+          <o xml:space="preserve" t="LicenseProperty">
+            <l2 n="Licenses" />
+          </o>
+        </Data>
+        <TypeList>
+          <Type n="LicenseProperty">{ec6b18ef-cd41-4646-b1b3-985c60f930b9}</Type>
+        </TypeList>
+      </XmlArchive>
+    </ObjectProperties>
+    <LineIds Name="Object">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="Object.address.Get">
+      <LineId Id="3" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="Object.className.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="Object.clone">
+      <LineId Id="3" Count="1" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="Object.compareTo">
+      <LineId Id="3" Count="4" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="Object.deepClone">
+      <LineId Id="3" Count="1" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="Object.deepDestruct">
+      <LineId Id="3" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="Object.destruct">
+      <LineId Id="4" Count="6" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="Object.FB_Exit">
+      <LineId Id="3" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="Object.FB_init">
+      <LineId Id="12" Count="0" />
+      <LineId Id="3" Count="7" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="Object.hashcode.Get">
+      <LineId Id="3" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="Object.isEqual">
+      <LineId Id="3" Count="4" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="Object.isObjectAlive.Get">
+      <LineId Id="3" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="Object.isObjectNull">
+      <LineId Id="3" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="Object.isObjectValid">
+      <LineId Id="3" Count="12" />
+      <LineId Id="20" Count="1" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="Object.name.Get">
+      <LineId Id="3" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

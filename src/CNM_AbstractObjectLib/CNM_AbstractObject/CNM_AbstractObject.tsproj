@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<TcSmProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2012/07/TcSmProject" TcSmVersion="1.0" TcVersion="3.1.4026.19" TcVersionFixed="true">
+	<Project ProjectGUID="{524F0802-3293-4841-82F0-AD988EB96ED2}" Target64Bit="true" SaveToTarget="false" ShowHideConfigurations="#x106">
+		<Plc>
+			<Project GUID="{BBFFE123-B5C9-4A78-886F-033A735EED3C}" Name="CNM_AbstractObject" PrjFilePath="CNM_AbstractObject\CNM_AbstractObject.plcproj" TmcFilePath="CNM_AbstractObject\CNM_AbstractObject.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" SymbolicMapping="true">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcHash="{DF7781F7-7AF7-A979-E82B-D78D02694BBD}" TmcPath="CNM_AbstractObject\CNM_AbstractObject.tmc">
+					<Name>CNM_AbstractObject Instance</Name>
+					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
+				</Instance>
+			</Project>
+		</Plc>
+	</Project>
+</TcSmProject>

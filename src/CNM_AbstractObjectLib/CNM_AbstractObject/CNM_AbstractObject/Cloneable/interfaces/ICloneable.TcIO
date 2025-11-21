@@ -1,0 +1,183 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.8">
+  <Itf Name="ICloneable" Id="{68483ec3-b439-4b9c-83b4-d1a108ddfc10}">
+    <Declaration><![CDATA[(*
+
+## Short summary
+
+Interface to clone objects.
+Cloning is necessary when an object is to be edited
+and at the same time the origin must remain unchangeable.
+This is the case, for example, if you have a list of teach points
+and a camera generates an offset for all teach points,
+then there is a deepClone of the list
+and then the offset is calculated for each teach point.  
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+
+
+*)
+
+INTERFACE ICloneable EXTENDS __SYSTEM.IQueryInterface
+]]></Declaration>
+    <Method Name="clone" Id="{acf95372-c3b2-4323-bc0d-52c4f18b7281}">
+      <Declaration><![CDATA[(*
+
+## Short summary
+
+This method is used to create a new instance
+of the object which has the same internal state as the object.
+If the object is a container class, the references to the content objects
+are not cloned for this there is the method :ref:`ICloneable.deepClone`.
+
+If an object does not support cloning the return value is
+``CNM_ReturnTypes.CloneResult.CLONE_IS_NOT_SUPPORTED``.
+
+If there is not enough memory or the cloning fails because the
+attribute enable dynamic creation was forgotten the return value is 
+``CNM_ReturnTypes.CloneResult.FAILED``.
+
+Only if the return value is ``CNM_ReturnTypes.CloneResult.SUCCESS``
+the output ``clonedObject`` points to the new object
+otherwise ``clonedObject`` is NULL.  
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+
+**Return:**``CNM_ReturnTypes.CloneResult.SUCCESS``: new object clone was created,
+``CNM_ReturnTypes.CloneResult.FAILED``: object clone failed
+``CNM_ReturnTypes.CloneResult.CLONE_IS_NOT_SUPPORTED``: object does not support cloning
+
+*)
+
+METHOD clone :CNM_ReturnTypes.CloneResult
+VAR_OUTPUT
+	(* new object instance or NULL if somthing went wrong *)
+	clonedObject	:IObject;
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="deepClone" Id="{fbf0f50d-b126-46e8-bd7b-4298630c6ba0}">
+      <Declaration><![CDATA[(*
+
+## Short summary
+
+This method is used to create a new instance
+of the object which has the same internal state as the object.
+If the object is a container class, the references to the content objects
+are cloned too.
+
+If an object does not support cloning the return value is
+``CNM_ReturnTypes.CloneResult.CLONE_IS_NOT_SUPPORTED``.
+
+If there is not enough memory or the cloning fails because the
+attribute enable dynamic creation was forgotten the return value is 
+``CNM_ReturnTypes.CloneResult.FAILED``.
+If something goes wrong, then this method must clean up everything
+that has been cloned and free the memory again.
+**The deepClone either works completely, or not at all**
+
+Only if the return value is ``CNM_ReturnTypes.CloneResult.SUCCESS``
+the output ``clonedObject`` points to the new object
+otherwise ``clonedObject`` is NULL.  
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+
+**Return:**``CNM_ReturnTypes.CloneResult.SUCCESS``: new object clone was created,
+``CNM_ReturnTypes.CloneResult.FAILED``: object clone failed
+``CNM_ReturnTypes.CloneResult.CLONE_IS_NOT_SUPPORTED``: object does not support deep cloning
+
+*)
+
+METHOD deepClone :CNM_ReturnTypes.CloneResult
+VAR_OUTPUT
+	(* new object instance or NULL if somthing went wrong *)
+	clonedObject	:IObject;
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="deepDestruct" Id="{cbc2f36a-9d7c-4d88-84fd-d5b03399ff35}">
+      <Declaration><![CDATA[(*
+
+## Short summary
+
+This method is a self-destruction if the object was created dynamically.
+If the object is a container class, the container content is destroyed with it.
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+
+METHOD deepDestruct
+]]></Declaration>
+    </Method>
+    <Method Name="destruct" Id="{b92eeb6b-22c9-40de-9f17-ebcdccea906d}">
+      <Declaration><![CDATA[(*
+
+## Short summary
+
+This method is a self-destruction if the object was created dynamically.
+If the object is a container class, the container content is not destroyed with it,
+for that there is the method :ref:`ICloneable.deepDestruct`
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+
+METHOD destruct
+]]></Declaration>
+    </Method>
+  </Itf>
+</TcPlcObject>

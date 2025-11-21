@@ -1,0 +1,65 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.8">
+  <Itf Name="IComparator" Id="{e3b4cd80-e7e7-475a-99f2-62c3a223c8eb}">
+    <Declaration><![CDATA[(*
+
+## Short summary
+
+This interface is used to compare objects with an alternative comparator. 
+This allows you to create your own sorting rules without having to modify existing objects. 
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+
+
+*)
+
+INTERFACE IComparator  EXTENDS IObject
+]]></Declaration>
+    <Method Name="compare" Id="{e8e07e32-41a3-4563-a7fc-0ffc4b6fcde1}">
+      <Declaration><![CDATA[(*
+
+## Short summary
+
+This method compares two objects, this is needed for sort orders.
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+
+**Return:**``SMALLER``: ``object1`` precedes in order,
+``EQUAL``: ``object1`` and ``object2`` at the same position in order,
+``GREATER``: ``object1`` is after in order. 
+
+*)
+
+METHOD compare :CNM_ReturnTypes.ComparationResult
+VAR_INPUT
+	(* first object to compare*)
+	object1	:IObject;
+	(* second object to compare*)
+	object2	:IObject;
+END_VAR
+]]></Declaration>
+    </Method>
+  </Itf>
+</TcPlcObject>

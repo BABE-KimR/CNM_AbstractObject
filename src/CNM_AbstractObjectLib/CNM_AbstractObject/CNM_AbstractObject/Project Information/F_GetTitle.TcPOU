@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.7">
+  <POU Name="F_GetTitle" Id="{5b39faaf-3fe5-4a46-92cc-430951517afe}" SpecialFunc="None">
+    <Declaration><![CDATA[// This function has been automatically generated from the project information.
+{attribute 'signature_flag' := '1073741824'}
+{attribute 'TcGenerated'}
+{attribute 'no-analysis'}
+FUNCTION F_GetTitle : WSTRING
+VAR_INPUT
+	
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[F_GetTitle := "CNM_AbstractObject";
+]]></ST>
+    </Implementation>
+    <LineIds Name="F_GetTitle">
+      <LineId Id="1" Count="1" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

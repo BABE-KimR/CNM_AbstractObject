@@ -1,0 +1,1310 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.8">
+  <POU Name="AbstractObject_Test" Id="{f24d8d58-e47e-4e35-9d01-ac9ffc31242e}" SpecialFunc="None">
+    <Declaration><![CDATA[(*
+short summary
+=================
+This is an simple Test for the IObject interface. This class containes tests for IObject implementations.
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+methods and properties
+=========================
+
+*)
+
+FUNCTION_BLOCK AbstractObject_Test EXTENDS TcUnit.FB_TestSuite
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	objectToTest1		:CNM_AbstractObject.IObject;
+	objectToTest2		:CNM_AbstractObject.IObject;
+	testPrefixObject1	:Tc2_System.T_MaxString;
+	testPrefixObject2	:Tc2_System.T_MaxString;	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF (THIS^.isInputValidationSuccessful()) THEN
+	THIS^.hasHashcode();
+	THIS^.isEqualToItself();
+	THIS^.isValid();
+	THIS^.hashcodesAreDifferent();
+	THIS^.isNotEqualToOther();
+	THIS^.validAddress();
+	THIS^.cloneTests();
+	THIS^.deepCloneTests();
+END_IF
+]]></ST>
+    </Implementation>
+    <Method Name="cloneTest" Id="{bcf56cd8-db3d-438f-8ba0-8a93b8010cbf}">
+      <Declaration><![CDATA[(*
+
+short summary
+=================
+Test checks if the ``clone`` method works properly,
+it performs different tests depending on the clone result
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+parameters
+=================
+
+*)
+
+METHOD PRIVATE cloneTest
+VAR_INPUT
+	(* object that should perform the test *)
+	object		:CNM_AbstractObject.IObject;
+END_VAR
+VAR
+	clonedObject		:CNM_AbstractObject.IObject;
+	result				:CNM_ReturnTypes.CloneResult;
+	memoryArea			:Tc2_System.E_TcMemoryArea;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[RETURN(NOT TcUnit.TEST_ORDERED(THIS^.createTestName(object, 'cloneTest')));
+
+result := object.clone(clonedObject => clonedObject);
+
+CASE result OF
+CNM_ReturnTypes.CloneResult.CLONE_IS_NOT_SUPPORTED:
+	THIS^.AssertTrue(clonedObject = 0, 'object does not support clone output clonedObject must be 0');
+CNM_ReturnTypes.CloneResult.FAILED:
+	THIS^.AssertTrue(FALSE, 'clone failed');
+	THIS^.AssertTrue(clonedObject = 0, 'output clonedObject must be 0');  
+CNM_ReturnTypes.CloneResult.SUCCESS:
+	THIS^.AssertFalse(object.isEqual(clonedObject), 'cloned object must be NOT equal to source object');
+	IF (object.isObjectValid(clonedObject)) THEN
+		THIS^.AssertTrue(
+			object.className = clonedObject.className,
+			'cloned object must have the same class name as source object'
+		);
+		THIS^.AssertTrue(
+			object.address <> clonedObject.address,
+			'clonedObject.address must be unequal to the address of the source object.address'
+		);
+		memoryArea := Tc2_System.F_CheckMemoryArea(pData := clonedObject.address, nSize := SIZEOF(__XWORD));
+		THIS^.AssertTrue(
+			memoryArea = Tc2_System.E_TcMemoryArea.Dynamic,
+			'Tc2_System.F_CheckMemoryArea(clonedObject.address, SIZEOF(__XWORD)) must return Tc2_System.E_TcMemoryArea.Dynamic'
+		);
+		THIS^.AssertTrue(
+			Condition	:= ((clonedObject.address MOD SIZEOF(__XWORD)) = 0),
+			Message 	:= 'clonedObject.address modulo SIZEOF(__XWORD) must be 0'
+		);
+	ELSE
+		THIS^.AssertTrue(FALSE,'cloned object must be a valid object');
+	END_IF 
+	 
+ELSE
+	THIS^.AssertTrue(FALSE, 'invalid return from clone method');
+	THIS^.AssertTrue(clonedObject = 0, 'output clonedObject must be 0'); 
+END_CASE
+
+IF (object.isObjectValid(clonedObject)) THEN
+	clonedObject.destruct();
+END_IF
+TcUnit.TEST_FINISHED();
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="cloneTests" Id="{ed73aee7-1df5-4288-b76e-9de52edd4f5a}">
+      <Declaration><![CDATA[(*
+
+short summary
+=================
+Calls :ref:`AbstractObject_Test.cloneTest` for the injected
+objects ``objectToTest1`` and ``objectToTest2``
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+
+METHOD PRIVATE cloneTests
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[THIS^.cloneTest(THIS^.objectToTest1);
+THIS^.cloneTest(THIS^.objectToTest2);
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="createTestName" Id="{3f5c866a-1b58-407e-b677-dae71b10b407}">
+      <Declaration><![CDATA[(*
+
+short summary
+=================
+creates a test name prefix for the test names
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+parameters
+=================
+:return: prefix for the test names for the specific object
+
+*)
+
+METHOD PRIVATE createTestName :Tc2_System.T_MaxString
+VAR_INPUT
+	(* object for which a prefix, for the test names, is to be generated *)
+	object		:CNM_AbstractObject.IObject;
+	(* name of the test *)
+	testName	:Tc2_System.T_MaxString;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[createTestName := object.className;
+createTestName := Tc2_Standard.CONCAT(
+	createTestName,
+	Tc2_Standard.CONCAT(
+		': ',
+		Tc2_Standard.CONCAT( 
+			THIS^.getNonQualifiedObjectName(object),
+			Tc2_Standard.CONCAT(': ', testName)
+		)
+	)
+);
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="deepCloneTest" Id="{e50c2cf6-a292-4399-be2b-903e9e44445c}">
+      <Declaration><![CDATA[(*
+
+short summary
+=================
+Test checks if the ``deepClone`` method works properly,
+it performs different tests depending on the clone result
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+parameters
+=================
+
+*)
+
+METHOD PRIVATE deepCloneTest
+VAR_INPUT
+	(* object that should perform the test *)
+	object		:CNM_AbstractObject.IObject;
+END_VAR
+VAR
+	clonedObject		:CNM_AbstractObject.IObject;
+	result				:CNM_ReturnTypes.CloneResult;
+	memoryArea			:Tc2_System.E_TcMemoryArea;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[RETURN(NOT TcUnit.TEST_ORDERED(THIS^.createTestName(object, 'deepCloneTest')));
+
+result := object.deepClone(clonedObject => clonedObject);
+
+CASE result OF
+CNM_ReturnTypes.CloneResult.CLONE_IS_NOT_SUPPORTED:
+	THIS^.AssertTrue(clonedObject = 0, 'object does not support clone output clonedObject must be 0');
+CNM_ReturnTypes.CloneResult.FAILED:
+	THIS^.AssertTrue(FALSE, 'clone failed');
+	THIS^.AssertTrue(clonedObject = 0, 'output clonedObject must be 0');  
+CNM_ReturnTypes.CloneResult.SUCCESS:
+	THIS^.AssertFalse(object.isEqual(clonedObject), 'cloned object must be NOT equal to source object');
+	IF (object.isObjectValid(clonedObject)) THEN
+		THIS^.AssertTrue(
+			object.className = clonedObject.className,
+			'cloned object must have the same class name as source object'
+		);
+		THIS^.AssertTrue(
+			object.address <> clonedObject.address,
+			'clonedObject.address must be unequal to the address of the source object.address'
+		);
+		memoryArea := Tc2_System.F_CheckMemoryArea(pData := clonedObject.address, nSize := SIZEOF(__XWORD));
+		THIS^.AssertTrue(
+			memoryArea = Tc2_System.E_TcMemoryArea.Dynamic,
+			'Tc2_System.F_CheckMemoryArea(clonedObject.address, SIZEOF(__XWORD)) must return Tc2_System.E_TcMemoryArea.Dynamic'
+		);
+		THIS^.AssertTrue(
+			Condition	:= ((clonedObject.address MOD SIZEOF(__XWORD)) = 0),
+			Message 	:= 'clonedObject.address modulo SIZEOF(__XWORD) must be 0'
+		);
+	ELSE
+		THIS^.AssertTrue(FALSE,'cloned object must be a valid object');
+	END_IF 
+	 
+ELSE
+	THIS^.AssertTrue(FALSE, 'invalid return from clone method');
+	THIS^.AssertTrue(clonedObject = 0, 'output clonedObject must be 0'); 
+END_CASE
+
+IF (object.isObjectValid(clonedObject)) THEN
+	clonedObject.deepDestruct();
+END_IF
+
+TcUnit.TEST_FINISHED();
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="deepCloneTests" Id="{d8f2ce5e-84af-4717-88ba-ffa74b477aeb}">
+      <Declaration><![CDATA[(*
+
+short summary
+=================
+Calls :ref:`AbstractObject_Test.deepCloneTest` for the injected
+objects ``objectToTest1`` and ``objectToTest2``
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+
+METHOD PRIVATE deepCloneTests
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[THIS^.deepCloneTest(THIS^.objectToTest1);
+THIS^.deepCloneTest(THIS^.objectToTest2);
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="FB_init" Id="{bcba1801-b384-422d-9bb2-2f18c5184f40}">
+      <Declaration><![CDATA[(*
+
+short summary
+=================
+constructor for the test class
+
+.. attention:: 
+	``testObject1`` and ``testObject1`` must be two different instances
+	and neither of the two objects may be NULL
+
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+parameters
+=================
+:return: is not used
+
+*)
+
+METHOD FB_init :BOOL
+VAR_INPUT
+	(* if TRUE, the retain variables are initialized (warm start / cold start) *)
+    bInitRetains	:BOOL;
+	(* if TRUE, the instance afterwards gets moved into the copy code (online change) *)
+    bInCopyCode		:BOOL;
+	(* first object which should perfom the tests *)
+	testObject1 :CNM_AbstractObject.IObject;
+	(* second object which should perform the tests *)
+	testObject2	:CNM_AbstractObject.IObject;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[THIS^.objectToTest1 := testObject1;
+THIS^.objectToTest2 := testObject2;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="getNonQualifiedObjectName" Id="{870df287-4853-4c75-aa2e-ac538a467cdb}">
+      <Declaration><![CDATA[(*
+
+short summary
+=================
+returns the name of the object without path
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+parameters
+=================
+:return: object name without path
+
+*)
+
+METHOD PRIVATE getNonQualifiedObjectName :STRING
+VAR_INPUT
+	object	:CNM_AbstractObject.IObject;
+END_VAR
+VAR
+	name	:Tc2_System.T_MaxString;
+	left	:Tc2_System.T_MaxString;
+	right	:Tc2_System.T_MaxString;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[name := object.name;
+IF (
+	Tc2_Utilities.FindAndSplitChar(
+		sSeparatorChar	:= '.',
+		pSrcString			:= ADR(name),
+		pLeftString			:= ADR(left),
+		pRightString		:= ADR(right),
+		nLeftSize			:= SIZEOF(left),
+		nRightSize			:= SIZEOF(right),
+		bSearchFromRight	:= TRUE
+	)
+) THEN
+	getNonQualifiedObjectName := right;
+ELSE
+	getNonQualifiedObjectName := object.name;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="hasHashcode" Id="{5981bc2f-bee5-4c2e-8346-cff470c227a0}">
+      <Declaration><![CDATA[(*
+
+short summary
+=================
+Test if given Object has a hashcode not equal to 0.
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+
+METHOD PRIVATE hasHashcode
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[RETURN(NOT TcUnit.TEST_ORDERED('hasHashcode'));
+
+THIS^.AssertFalse(
+	Condition	:= THIS^.objectToTest1.hashcode = 0,
+	Message		:= 'objectToTest1.hashcode must be unequal 0');
+				
+THIS^.AssertFalse(
+	Condition 	:= THIS^.objectToTest2.hashcode = 0,
+	Message := 'objectToTest2.hashcode must be unequal 0');
+ 
+TEST_FINISHED();]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="hashcodesAreDifferent" Id="{2aa40b41-ec25-4f43-8417-1ec8a19d2931}">
+      <Declaration><![CDATA[(*
+
+short summary
+=================
+Test if both given Objects have a different hashcode.
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+
+METHOD PRIVATE hashcodesAreDifferent
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[RETURN(NOT TcUnit.TEST_ORDERED('hashodesAreDifferent'));
+
+THIS^.AssertFalse(
+	Condition	:= THIS^.objectToTest1.hashcode = THIS^.objectToTest2.hashcode,
+	Message		:= 'objectToTest1.hashcode must be unequal objectToTest2.hashcode'
+);
+
+THIS^.AssertTrue(
+	Condition	:= THIS^.objectToTest1.hashcode = THIS^.objectToTest1.hashcode,
+	Message		:= 'objectToTest1.hashcode must be equal objectToTest1.hashcode'
+);
+
+THIS^.AssertTrue(
+	Condition	:= THIS^.objectToTest2.hashcode = THIS^.objectToTest2.hashcode,
+	Message		:= 'objectToTest2.hashcode must be equal objectToTest2.hashcode'
+);
+
+ 
+TEST_FINISHED();]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="isEqualToItself" Id="{4025d47a-7bd3-415e-be8b-aee3c5c2af84}">
+      <Declaration><![CDATA[(*
+
+short summary
+=================
+Test if given Object is equal to itself.
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+
+METHOD PRIVATE isEqualToItself
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[RETURN(NOT TcUnit.TEST_ORDERED('isEqualToItself'));
+ 
+THIS^.AssertTrue(
+	Condition	:= THIS^.objectToTest1.isEqual(THIS^.objectToTest1),
+	Message		:= 'objectToTest1 was unequal to itself, but it should!'
+);
+
+THIS^.AssertTrue(
+	Condition	:= THIS^.objectToTest2.isEqual(THIS^.objectToTest2),
+	Message		:= 'objectToTest2 was unequal to itself, but it should!'
+);
+ 
+TEST_FINISHED();
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="isInputValidationSuccessful" Id="{d70825c1-41ea-4dca-be57-f83bcb0b794c}">
+      <Declaration><![CDATA[(*
+
+short summary
+=================
+Tests the validity of the injected objects 
+``objectToTest1`` and ``objectToTest2`` to be
+able to run the other tests without exceptions
+
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+
+METHOD PRIVATE isInputValidationSuccessful :BOOL
+VAR_INPUT
+END_VAR
+VAR
+	addressObject1			:POINTER TO __XWORD;
+	addressObject2			:POINTER TO __XWORD;
+	memoryAreaObject1		:Tc2_System.E_TcMemoryArea;
+	memoryAreaObject2		:Tc2_System.E_TcMemoryArea;
+END_VAR
+VAR_INST
+	returnValue :BOOL := FALSE;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[isInputValidationSuccessful := returnValue;
+RETURN(NOT TcUnit.TEST_ORDERED('inputValidation'));
+
+THIS^.AssertTrue(
+	Condition	:= (THIS^.objectToTest1 <> 0),
+	Message		:= 'THIS^.objectToTest1 must be not null to proceed the tests'
+);
+THIS^.AssertTrue(
+	Condition	:= (THIS^.objectToTest2 <> 0),
+	Message		:= 'THIS^.objectToTest2 must be not null to proceed the tests'
+);
+
+addressObject1 := ADR(THIS^.objectToTest1);
+
+THIS^.AssertTrue(
+	Condition	:= (addressObject1^ MOD SIZEOF(__XWORD) = 0),
+	Message		:= 'objectToTest1 must point to an alinged address'
+);
+
+memoryAreaObject1 := Tc2_System.F_CheckMemoryArea(
+	pData := addressObject1^,
+	nSize := SIZEOF(__XWORD)
+);
+
+THIS^.AssertTrue(
+	Condition	:= (memoryAreaObject1 <> Tc2_System.E_TcMemoryArea.Unknown),
+	Message		:= 'objectToTest1 must be in a known memory area'
+);
+
+addressObject2 := ADR(THIS^.objectToTest2);
+
+THIS^.AssertTrue(
+	Condition	:= (addressObject2^ MOD SIZEOF(__XWORD) = 0),
+	Message		:= 'objectToTest2 must point to an alinged address'
+);
+
+memoryAreaObject2 := Tc2_System.F_CheckMemoryArea(
+	pData := addressObject2^,
+	nSize := SIZEOF(__XWORD)
+);
+
+THIS^.AssertTrue(
+	Condition	:= (memoryAreaObject2 <> Tc2_System.E_TcMemoryArea.Unknown),
+	Message		:= 'objectToTest2 must be in a known memory area'
+);
+
+returnValue := (
+	((addressObject1^ MOD SIZEOF(__XWORD)) = 0)
+	AND ((addressObject2^ MOD SIZEOF(__XWORD)) = 0)
+	AND (THIS^.objectToTest1 <> 0)
+	AND (THIS^.objectToTest2 <> 0)
+	AND (memoryAreaObject1 <> Tc2_System.E_TcMemoryArea.Unknown)
+	AND (memoryAreaObject2 <> Tc2_System.E_TcMemoryArea.Unknown)
+);
+
+TcUnit.TEST_FINISHED();
+isInputValidationSuccessful := returnValue;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="isNotEqualToOther" Id="{1569b24a-b720-4de0-b4b0-f72aeb27008e}">
+      <Declaration><![CDATA[(*
+
+short summary
+=================
+Test if given Objects are not equal to each other.
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+
+METHOD PRIVATE isNotEqualToOther
+VAR
+	object 			:CNM_AbstractObject.IObject;
+	stupidObject1	:IStupidObject1;
+	stupidObject2	:IStupidObject2;
+	stupidObject3	:IStupidObject3;
+	stupidObject4	:IStupidObject4;
+	stupidObject	:StupidObject();
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[RETURN(NOT TcUnit.TEST_ORDERED('isNotEqualToOther'));
+
+stupidObject3	:= stupidObject4;
+stupidObject2	:= stupidObject4;
+stupidObject1	:= stupidObject4;
+object			:= stupidObject4;
+
+THIS^.AssertFalse(
+	Condition	:= THIS^.objectToTest1.isEqual(THIS^.objectToTest2),
+	Message		:= 'objectToTest1.isEqual(objectToTest2) must return FALSE'
+);
+				
+THIS^.AssertFalse(
+	Condition	:= THIS^.objectToTest2.isEqual(THIS^.objectToTest1),
+	Message		:= 'objectToTest2.isEqual(objectToTest1) must return FALSE'
+);
+
+THIS^.AssertFalse(
+	Condition	:= THIS^.objectToTest1.isEqual(object),
+	Message		:= 'objectToTest1.isEqual(object) must return FALSE'
+);
+
+THIS^.AssertFalse(
+	Condition	:= THIS^.objectToTest2.isEqual(object),
+	Message		:= 'objectToTest2.isEqual(object) must return FALSE'
+);
+
+THIS^.AssertFalse(
+	Condition	:= THIS^.objectToTest1.isEqual(stupidObject1),
+	Message		:= 'objectToTest1.isEqual(stupidObject1) must return FALSE'
+);
+
+THIS^.AssertFalse(
+	Condition	:= THIS^.objectToTest2.isEqual(stupidObject1),
+	Message		:= 'objectToTest2.isEqual(stupidObject1) must return FALSE'
+);
+
+THIS^.AssertFalse(
+	Condition	:= THIS^.objectToTest1.isEqual(stupidObject2),
+	Message		:= 'objectToTest1.isEqual(stupidObject2) must return FALSE'
+);
+
+THIS^.AssertFalse(
+	Condition	:= THIS^.objectToTest2.isEqual(stupidObject2),
+	Message		:= 'objectToTest2.isEqual(stupidObject2) must return FALSE'
+);
+
+THIS^.AssertFalse(
+	Condition	:= THIS^.objectToTest1.isEqual(stupidObject3),
+	Message		:= 'objectToTest1.isEqual(stupidObject3) must return FALSE'
+);
+
+THIS^.AssertFalse(
+	Condition	:= THIS^.objectToTest2.isEqual(stupidObject3),
+	Message		:= 'objectToTest2.isEqual(stupidObject3) must return FALSE'
+);
+
+THIS^.AssertFalse(
+	Condition	:= THIS^.objectToTest2.isEqual(stupidObject4),
+	Message		:= 'objectToTest2.isEqual(stupidObject4) must return FALSE'
+);
+
+THIS^.AssertFalse(
+	Condition	:= THIS^.objectToTest1.isEqual(stupidObject4),
+	Message		:= 'objectToTest1.isEqual(stupidObject4) must return FALSE'
+);
+
+THIS^.AssertFalse(
+	Condition	:= THIS^.objectToTest1.isEqual(stupidObject),
+	Message		:= 'objectToTest1.isEqual(stupidObject) must return FALSE'
+);
+
+THIS^.AssertFalse(
+	Condition	:= THIS^.objectToTest2.isEqual(stupidObject),
+	Message		:= 'objectToTest2.isEqual(stupidObject) must return FALSE'
+);
+
+THIS^.AssertFalse(
+	Condition	:= THIS^.objectToTest1.isEqual(object := 0),
+	Message		:= 'objectToTest1.isEqual(object := 0) must return FALSE'
+);
+
+THIS^.AssertFalse(
+	Condition	:= THIS^.objectToTest2.isEqual(object := 0),
+	Message		:= 'objectToTest2.isEqual(object := 0) must return FALSE'
+);
+
+TEST_FINISHED();
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="isValid" Id="{1358229d-fc30-4d7f-80a8-3d694e747e58}">
+      <Declaration><![CDATA[(*
+
+short summary
+=================
+Test if given Object is not null and null tests work.
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+parameters
+=================
+
+*)
+
+METHOD PRIVATE isValid
+VAR
+	object 			:CNM_AbstractObject.IObject;
+	stupidObject1	:IStupidObject1;
+	stupidObject2	:IStupidObject2;
+	stupidObject3	:IStupidObject3;
+	stupidObject4	:IStupidObject4;
+	stupidObject	:StupidObject();
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[RETURN(NOT TcUnit.TEST_ORDERED('isValid'));
+				
+THIS^.AssertTrue(
+	Condition	:= THIS^.objectToTest1.isObjectValid(THIS^.objectToTest1),
+	Message		:= 'objectToTest1.isObjectValid(objectToTest1) must return TRUE'
+);
+
+THIS^.AssertFalse(
+	Condition	:= THIS^.objectToTest1.isObjectNull(THIS^.objectToTest1),
+	Message		:= 'objectToTest1.isObjectNull(objectToTest1) must return FALSE'
+);
+
+THIS^.AssertFalse(
+	Condition	:= THIS^.objectToTest1.isObjectValid(object := 0),
+	Message		:= 'objectToTest1.isObjectValid(object := 0) must return FALSE'
+);
+				
+THIS^.AssertTrue(
+	Condition	:= THIS^.objectToTest1.isObjectNull(object := 0),
+	Message		:= 'objectToTest1.isObjectNull(object := 0) must return TRUE'
+);
+
+stupidObject3	:= stupidObject4;
+stupidObject2	:= stupidObject4;
+stupidObject1	:= stupidObject4;
+object			:= stupidObject4;
+
+THIS^.AssertFalse(
+	Condition	:= THIS^.objectToTest1.isObjectValid(stupidObject4),
+	Message		:= 'Interface stupidObject4 is empty: objectToTest1.isObjectValid(stupidObject4) must return FALSE'
+);
+
+THIS^.AssertTrue(
+	Condition	:= THIS^.objectToTest1.isObjectNull(stupidObject4),
+	Message		:= 'Interface stupidObject4 is empty: objectToTest1.isObjectNull(stupidObject4) must return TRUE'
+);
+
+THIS^.AssertFalse(
+	Condition	:= THIS^.objectToTest1.isObjectValid(stupidObject3),
+	Message		:= 'stupidObject3 was initialized with the empty interface stupidObject4: objectToTest1.isObjectValid(stupidObject3) must return FALSE'
+);
+
+THIS^.AssertTrue(
+	Condition	:= THIS^.objectToTest1.isObjectNull(stupidObject3),
+	Message		:= 'stupidObject3 was initialized with the empty interface stupidObject4: objectToTest1.isObjectNull(stupidObject3) must return TRUE'
+);
+
+THIS^.AssertFalse(
+	Condition	:= THIS^.objectToTest1.isObjectValid(stupidObject2),
+	Message		:= 'stupidObject2 was initialized with the empty interface stupidObject4: objectToTest1.isObjectValid(stupidObject2) must return FALSE'
+);
+
+THIS^.AssertTrue(
+	Condition	:= THIS^.objectToTest1.isObjectNull(stupidObject2),
+	Message		:= 'stupidObject2 was initialized with the empty interface stupidObject4: objectToTest1.isObjectNull(stupidObject2) must return TRUE'
+);
+
+THIS^.AssertFalse(
+	Condition	:= THIS^.objectToTest1.isObjectValid(stupidObject1),
+	Message		:= 'stupidObject1 was initialized with the empty interface stupidObject4: objectToTest1.isObjectValid(stupidObject1) must return FALSE'
+);
+
+THIS^.AssertTrue(
+	Condition	:= THIS^.objectToTest1.isObjectNull(stupidObject1),
+	Message		:= 'stupidObject1 was initialized with the empty interface stupidObject4: objectToTest1.isObjectNull(stupidObject1) must return TRUE'
+);
+
+THIS^.AssertFalse(
+	Condition	:= THIS^.objectToTest1.isObjectValid(object),
+	Message		:= 'object was initialized with the empty interface stupidObject4: objectToTest1.isObjectValid(object) must return FALSE'
+);
+
+THIS^.AssertTrue(
+	Condition	:= THIS^.objectToTest1.isObjectNull(object),
+	Message		:= 'object was initialized with the empty interface stupidObject4: objectToTest1.isObjectNull(object) must return TRUE'
+);
+
+stupidObject4	:= stupidObject;
+stupidObject3	:= stupidObject4;
+stupidObject2	:= stupidObject4;
+stupidObject1	:= stupidObject4;
+object			:= stupidObject4;
+
+THIS^.AssertTrue(
+	Condition	:= THIS^.objectToTest1.isObjectValid(stupidObject4),
+	Message		:= 'Interface stupidObject4 is initialized with stupidObject: objectToTest1.isObjectValid(stupidObject4) must return TRUE'
+);
+
+THIS^.AssertFalse(
+	Condition	:= THIS^.objectToTest1.isObjectNull(stupidObject4),
+	Message		:= 'Interface stupidObject4 is initialized with stupidObject: objectToTest1.isObjectNull(stupidObject4) must return FALSE'
+);
+
+THIS^.AssertTrue(
+	Condition	:= THIS^.objectToTest1.isObjectValid(stupidObject3),
+	Message		:= 'stupidObject3 was initialized with the valid interface stupidObject4: objectToTest1.isObjectValid(stupidObject3) must return TRUE'
+);
+
+THIS^.AssertFalse(
+	Condition	:= THIS^.objectToTest1.isObjectNull(stupidObject3),
+	Message		:= 'stupidObject3 was initialized with the valid interface stupidObject4: objectToTest1.isObjectNull(stupidObject3) must return FALSE'
+);
+
+THIS^.AssertTrue(
+	Condition	:= THIS^.objectToTest1.isObjectValid(stupidObject2),
+	Message		:= 'stupidObject2 was initialized with the valid interface stupidObject4: objectToTest1.isObjectValid(stupidObject2) must return TRUE'
+);
+
+THIS^.AssertFalse(
+	Condition	:= THIS^.objectToTest1.isObjectNull(stupidObject2),
+	Message		:= 'stupidObject2 was initialized with the valid interface stupidObject4: objectToTest1.isObjectNull(stupidObject2) must return FALSE'
+);
+
+THIS^.AssertTrue(
+	Condition	:= THIS^.objectToTest1.isObjectValid(stupidObject1),
+	Message		:= 'stupidObject1 was initialized with the valid interface stupidObject4: objectToTest1.isObjectValid(stupidObject1) must return TRUE'
+);
+
+THIS^.AssertFalse(
+	Condition	:= THIS^.objectToTest1.isObjectNull(stupidObject1),
+	Message		:= 'stupidObject1 was initialized with the valid interface stupidObject4: objectToTest1.isObjectNull(stupidObject1) must return FALSE'
+);
+
+THIS^.AssertTrue(
+	Condition	:= THIS^.objectToTest1.isObjectValid(object),
+	Message		:= 'object was initialized with the valid interface stupidObject4: objectToTest1.isObjectValid(object) must return TRUE'
+);
+
+THIS^.AssertFalse(
+	Condition	:= THIS^.objectToTest1.isObjectNull(object),
+	Message		:= 'object was initialized with the valid interface stupidObject4: objectToTest1.isObjectNull(object) must return FALSE'
+);
+
+IF (THIS^.objectToTest1.clone(clonedObject => object) = CNM_ReturnTypes.CloneResult.SUCCESS) THEN
+	THIS^.AssertTrue(
+		Condition	:= THIS^.objectToTest1.isObjectValid(object),
+		Message		:= 'object is a clone of THIS^.objectToTest1: objectToTest1.isObjectValid(object) must return TRUE'
+	);
+	
+	THIS^.AssertFalse(
+		Condition	:= THIS^.objectToTest1.isObjectNull(object),
+		Message		:= 'object is a clone of THIS^.objectToTest1: objectToTest1.isObjectNull(object) must return FALSE'
+	);
+	IF (object <> 0) THEN
+		object.destruct();
+	END_IF;
+	object := 0;
+END_IF
+
+IF (THIS^.objectToTest2.clone(clonedObject => object) = CNM_ReturnTypes.CloneResult.SUCCESS) THEN
+	THIS^.AssertTrue(
+		Condition	:= THIS^.objectToTest1.isObjectValid(object),
+		Message		:= 'object is a clone of THIS^.objectToTest2: objectToTest1.isObjectValid(object) must return TRUE'
+	);
+	
+	THIS^.AssertFalse(
+		Condition	:= THIS^.objectToTest1.isObjectNull(object),
+		Message		:= 'object is a clone of THIS^.objectToTest2: objectToTest1.isObjectNull(object) must return FALSE'
+	);
+
+	IF (object <> 0) THEN
+		object.destruct();
+	END_IF;
+END_IF
+
+TEST_FINISHED();
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="validAddress" Id="{cc548ba3-1159-4a14-81d7-43a255773725}">
+      <Declaration><![CDATA[(*
+
+short summary
+=================
+Test if given Objects have an address that is not 0.
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+
+METHOD PRIVATE validAddress
+VAR
+	memoryArea		:Tc2_System.E_TcMemoryArea;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[RETURN(NOT TcUnit.TEST_ORDERED('validAddress'));
+ 
+THIS^.AssertFalse(
+	Condition	:= THIS^.objectToTest1.address = 0,
+	Message 	:= 'objectToTest1.address must be unequal 0'
+);
+				
+THIS^.AssertFalse(
+	Condition	:= THIS^.objectToTest2.address = 0,
+	Message 	:= 'objectToTest2.address must be unequal 0'
+);
+
+THIS^.AssertFalse(
+	Condition	:= THIS^.objectToTest1.address = THIS^.objectToTest2.address,
+	Message 	:= 'objectToTest1.address must be unequal objectToTest2.address'
+);
+
+memoryArea := Tc2_System.F_CheckMemoryArea(pData := THIS^.objectToTest1.address, nSize := SIZEOF(__XWORD));
+
+THIS^.AssertFalse(
+	Condition	:= memoryArea = Tc2_System.E_TcMemoryArea.Unknown,
+	Message 	:= 'Tc2_System.F_CheckMemoryArea(objectToTest1.address, SIZEOF(__XWORD)) must not return Tc2_System.E_TcMemoryArea.Unknown'
+);
+
+memoryArea := Tc2_System.F_CheckMemoryArea(pData := THIS^.objectToTest2.address, nSize := SIZEOF(__XWORD));
+
+THIS^.AssertFalse(
+	Condition	:= memoryArea = Tc2_System.E_TcMemoryArea.Unknown,
+	Message 	:= 'Tc2_System.F_CheckMemoryArea(objectToTest2.address, SIZEOF(__XWORD)) must not return Tc2_System.E_TcMemoryArea.Unknown'
+);
+
+THIS^.AssertTrue(
+	Condition	:= ((THIS^.objectToTest1.address MOD SIZEOF(__XWORD)) = 0),
+	Message 	:= 'objectToTest1.address modulo SIZEOF(__XWORD) must be 0'
+);
+
+THIS^.AssertTrue(
+	Condition	:= ((THIS^.objectToTest2.address MOD SIZEOF(__XWORD)) = 0),
+	Message 	:= 'objectToTest2.address modulo SIZEOF(__XWORD) must be 0'
+);
+ 
+TEST_FINISHED();
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="AbstractObject_Test">
+      <LineId Id="249" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="91" Count="0" />
+      <LineId Id="130" Count="2" />
+      <LineId Id="169" Count="0" />
+      <LineId Id="209" Count="0" />
+      <LineId Id="250" Count="0" />
+      <LineId Id="210" Count="0" />
+    </LineIds>
+    <LineIds Name="AbstractObject_Test.cloneTest">
+      <LineId Id="277" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="148" Count="0" />
+      <LineId Id="47" Count="1" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="51" Count="0" />
+      <LineId Id="57" Count="0" />
+      <LineId Id="59" Count="0" />
+      <LineId Id="53" Count="0" />
+      <LineId Id="60" Count="0" />
+      <LineId Id="149" Count="0" />
+      <LineId Id="63" Count="0" />
+      <LineId Id="150" Count="2" />
+      <LineId Id="283" Count="3" />
+      <LineId Id="282" Count="0" />
+      <LineId Id="288" Count="3" />
+      <LineId Id="293" Count="3" />
+      <LineId Id="154" Count="1" />
+      <LineId Id="153" Count="0" />
+      <LineId Id="279" Count="0" />
+      <LineId Id="52" Count="0" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="64" Count="0" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="65" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="66" Count="1" />
+      <LineId Id="298" Count="0" />
+      <LineId Id="68" Count="0" />
+    </LineIds>
+    <LineIds Name="AbstractObject_Test.cloneTests">
+      <LineId Id="5" Count="2" />
+    </LineIds>
+    <LineIds Name="AbstractObject_Test.createTestName">
+      <LineId Id="81" Count="10" />
+      <LineId Id="15" Count="0" />
+    </LineIds>
+    <LineIds Name="AbstractObject_Test.deepCloneTest">
+      <LineId Id="277" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="148" Count="0" />
+      <LineId Id="47" Count="1" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="51" Count="0" />
+      <LineId Id="57" Count="0" />
+      <LineId Id="59" Count="0" />
+      <LineId Id="53" Count="0" />
+      <LineId Id="60" Count="0" />
+      <LineId Id="149" Count="0" />
+      <LineId Id="63" Count="0" />
+      <LineId Id="150" Count="2" />
+      <LineId Id="283" Count="3" />
+      <LineId Id="282" Count="0" />
+      <LineId Id="288" Count="3" />
+      <LineId Id="293" Count="3" />
+      <LineId Id="154" Count="1" />
+      <LineId Id="153" Count="0" />
+      <LineId Id="279" Count="0" />
+      <LineId Id="52" Count="0" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="64" Count="0" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="65" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="66" Count="1" />
+      <LineId Id="297" Count="1" />
+      <LineId Id="68" Count="0" />
+    </LineIds>
+    <LineIds Name="AbstractObject_Test.deepCloneTests">
+      <LineId Id="5" Count="2" />
+    </LineIds>
+    <LineIds Name="AbstractObject_Test.FB_init">
+      <LineId Id="6" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="21" Count="0" />
+    </LineIds>
+    <LineIds Name="AbstractObject_Test.getNonQualifiedObjectName">
+      <LineId Id="5" Count="0" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="11" Count="8" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="23" Count="3" />
+    </LineIds>
+    <LineIds Name="AbstractObject_Test.hasHashcode">
+      <LineId Id="78" Count="0" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="77" Count="0" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="79" Count="0" />
+      <LineId Id="18" Count="1" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="AbstractObject_Test.hashcodesAreDifferent">
+      <LineId Id="6" Count="1" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="45" Count="9" />
+      <LineId Id="44" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="AbstractObject_Test.isEqualToItself">
+      <LineId Id="6" Count="1" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="69" Count="0" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="70" Count="1" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="72" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="73" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="68" Count="0" />
+    </LineIds>
+    <LineIds Name="AbstractObject_Test.isInputValidationSuccessful">
+      <LineId Id="10" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="13" Count="2" />
+      <LineId Id="17" Count="3" />
+      <LineId Id="84" Count="0" />
+      <LineId Id="80" Count="0" />
+      <LineId Id="118" Count="0" />
+      <LineId Id="69" Count="3" />
+      <LineId Id="117" Count="0" />
+      <LineId Id="82" Count="0" />
+      <LineId Id="89" Count="2" />
+      <LineId Id="116" Count="0" />
+      <LineId Id="92" Count="3" />
+      <LineId Id="97" Count="1" />
+      <LineId Id="115" Count="0" />
+      <LineId Id="99" Count="3" />
+      <LineId Id="114" Count="0" />
+      <LineId Id="103" Count="3" />
+      <LineId Id="113" Count="0" />
+      <LineId Id="107" Count="4" />
+      <LineId Id="60" Count="0" />
+      <LineId Id="62" Count="3" />
+      <LineId Id="119" Count="0" />
+      <LineId Id="121" Count="0" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="112" Count="0" />
+      <LineId Id="58" Count="1" />
+      <LineId Id="16" Count="0" />
+    </LineIds>
+    <LineIds Name="AbstractObject_Test.isNotEqualToOther">
+      <LineId Id="6" Count="0" />
+      <LineId Id="59" Count="4" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="44" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="64" Count="0" />
+      <LineId Id="66" Count="3" />
+      <LineId Id="74" Count="0" />
+      <LineId Id="70" Count="3" />
+      <LineId Id="75" Count="9" />
+      <LineId Id="65" Count="0" />
+      <LineId Id="85" Count="13" />
+      <LineId Id="114" Count="0" />
+      <LineId Id="116" Count="3" />
+      <LineId Id="99" Count="9" />
+      <LineId Id="120" Count="0" />
+      <LineId Id="122" Count="3" />
+      <LineId Id="109" Count="4" />
+      <LineId Id="126" Count="9" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="136" Count="0" />
+    </LineIds>
+    <LineIds Name="AbstractObject_Test.isValid">
+      <LineId Id="108" Count="1" />
+      <LineId Id="116" Count="0" />
+      <LineId Id="128" Count="0" />
+      <LineId Id="117" Count="0" />
+      <LineId Id="127" Count="0" />
+      <LineId Id="131" Count="0" />
+      <LineId Id="133" Count="4" />
+      <LineId Id="139" Count="3" />
+      <LineId Id="118" Count="1" />
+      <LineId Id="129" Count="0" />
+      <LineId Id="120" Count="0" />
+      <LineId Id="130" Count="0" />
+      <LineId Id="147" Count="0" />
+      <LineId Id="145" Count="0" />
+      <LineId Id="148" Count="2" />
+      <LineId Id="196" Count="0" />
+      <LineId Id="198" Count="8" />
+      <LineId Id="151" Count="0" />
+      <LineId Id="153" Count="3" />
+      <LineId Id="161" Count="0" />
+      <LineId Id="157" Count="3" />
+      <LineId Id="152" Count="0" />
+      <LineId Id="162" Count="8" />
+      <LineId Id="180" Count="0" />
+      <LineId Id="171" Count="8" />
+      <LineId Id="146" Count="0" />
+      <LineId Id="181" Count="8" />
+      <LineId Id="195" Count="0" />
+      <LineId Id="190" Count="4" />
+      <LineId Id="207" Count="9" />
+      <LineId Id="218" Count="39" />
+      <LineId Id="290" Count="1" />
+      <LineId Id="294" Count="11" />
+      <LineId Id="323" Count="0" />
+      <LineId Id="293" Count="0" />
+      <LineId Id="306" Count="0" />
+      <LineId Id="308" Count="9" />
+      <LineId Id="322" Count="0" />
+      <LineId Id="318" Count="3" />
+      <LineId Id="121" Count="1" />
+      <LineId Id="53" Count="0" />
+    </LineIds>
+    <LineIds Name="AbstractObject_Test.validAddress">
+      <LineId Id="6" Count="1" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="44" Count="3" />
+      <LineId Id="77" Count="0" />
+      <LineId Id="79" Count="3" />
+      <LineId Id="68" Count="1" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="51" Count="3" />
+      <LineId Id="70" Count="6" />
+      <LineId Id="83" Count="0" />
+      <LineId Id="86" Count="8" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="55" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

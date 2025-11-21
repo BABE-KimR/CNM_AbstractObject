@@ -1,0 +1,264 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.8">
+  <Itf Name="IObject" Id="{a04d1875-6497-46d0-aa52-6c8b68a7d941}">
+    <Declaration><![CDATA[(*
+
+## Short summary
+
+Every Coding Ninja Monkey class must implement the interface :ref:`IObject`.
+This makes it possible to keep different classes very general, such as lists. 
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+
+
+*)
+
+INTERFACE IObject EXTENDS __SYSTEM.IQueryInterface, IComparable, ICloneable
+]]></Declaration>
+    <Property Name="address" Id="{142d035c-d4f4-4264-88d7-ca634808cdba}">
+      <Declaration><![CDATA[(*
+
+## Short summary
+
+This property returns the address of the concrete object, 
+which is useful to work with querypointer in a simplified way.
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+
+PROPERTY address :__XWORD]]></Declaration>
+      <Get Name="Get" Id="{2f3aaf34-756c-4b19-b587-7019bf0e7977}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="className" Id="{df02a586-3808-444e-aba7-3c636acbddef}">
+      <Declaration><![CDATA[(*
+
+## Short summary
+
+This abstract property returns the class name of the concrete object, 
+which is useful for logging/debugging purpose.
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+
+PROPERTY className :ClassName]]></Declaration>
+      <Get Name="Get" Id="{beef47d6-e4bc-456c-960b-10c4f89ce2fd}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="hashcode" Id="{5a9f3523-4d7b-439a-96be-1be5c7e848f9}">
+      <Declaration><![CDATA[(*
+
+## Short summary
+
+This property returns the unique hash code of the object. 
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+
+PROPERTY hashcode :Hashcode]]></Declaration>
+      <Get Name="Get" Id="{7167751b-df75-47df-acd7-fb8dca617991}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Method Name="isEqual" Id="{481dd84f-ab9f-4fd1-9af1-a55a2280a41e}">
+      <Declaration><![CDATA[(*
+
+## Short summary
+
+This method is used to check if two objects are equal. 
+If the hash code of the objects is identical, then the foreign object is the same.
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+
+**Return:**``FALSE``: foreign object and object are not the same,
+``TRUE``: foreign object and object are the same
+
+*)
+
+METHOD isEqual :BOOL
+VAR_INPUT
+	(* foreign objet to check*)
+	object	:IObject;
+END_VAR
+]]></Declaration>
+    </Method>
+    <Property Name="isObjectAlive" Id="{f7e047a1-9323-4376-98db-2af70889f193}">
+      <Declaration><![CDATA[(*
+
+## Short summary
+
+This property returns true if the object is valid.
+Used for internal reasons inside the isObjectValid method to detect 
+deleted objects as not valid.
+Should not be used for any other reason!
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+
+PROPERTY INTERNAL isObjectAlive :BOOL
+]]></Declaration>
+      <Get Name="Get" Id="{081b1354-eedb-4b0a-9f0e-f015008fcaef}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+      </Get>
+    </Property>
+    <Method Name="isObjectNull" Id="{e12f1edc-81ca-4e50-98a9-e470baf606fc}">
+      <Declaration><![CDATA[(*
+
+## Short summary
+
+This method is a helper method to check if an object is NULL.
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+
+**Return:**``FALSE``: foreign object is not NULL, ``TRUE``: foreign object is NULL
+
+*)
+
+METHOD isObjectNull :BOOL
+VAR_INPUT
+	(* foreign object to check*)
+	object	:IObject;
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="isObjectValid" Id="{8aea709a-ebf7-4e03-b465-3d6404347b70}">
+      <Declaration><![CDATA[(*
+
+## Short summary
+
+This method is a helper method to check if an object is valid (not NULL).
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+
+**Return:**``FALSE``: foreign object is not valid, ``TRUE``: foreign object is valid
+
+*)
+
+METHOD isObjectValid :BOOL
+VAR_INPUT
+	(* foreign object to check*)
+	object	:IObject;
+END_VAR
+]]></Declaration>
+    </Method>
+    <Property Name="name" Id="{20cf33fa-f369-4a52-b196-40a4447a48c1}">
+      <Declaration><![CDATA[(*
+
+## Short summary
+
+This property returns the full qualified name of the concrete object, 
+which is useful for logging.
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+
+PROPERTY name :ObjectName]]></Declaration>
+      <Get Name="Get" Id="{6512b7a6-8ae6-4a2c-b7d9-10fb60460afc}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+  </Itf>
+</TcPlcObject>
