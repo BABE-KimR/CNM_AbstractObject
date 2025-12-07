@@ -44,7 +44,7 @@ limitations under the License.
 ## Usage
 
 1. Install the library using the TwinCat library repositiory
-2. add the library as reference to your PLC project
+2. Add the library as reference to your PLC project
 3. Follow the guidelines for your TwinCAT 3 development projects
 
 ## Contributing
@@ -55,7 +55,7 @@ For questions, feedback, or contributions, please contact:
 ## Changelog
 
 ### Version 1.0.0.0
-*	Build with TwinCAT version 4026.19
+*	Built with TwinCAT version 4026.19
 *	Used TwinCAT libraies:
 	*	Tc2_Standard 3.4.5.0
 	*	Tc2_System 3.9.1.0
@@ -64,7 +64,7 @@ For questions, feedback, or contributions, please contact:
     *   CNM_ReturnTypes 1.0.0.0
 *	library namespace is *CNM_AbstractObject*
 *	library placeholder is *CNM_AbstractObject*
-*	libaray category is ekvip|base|types
+*	library category is ekvip|base|types
 
 ---
 
