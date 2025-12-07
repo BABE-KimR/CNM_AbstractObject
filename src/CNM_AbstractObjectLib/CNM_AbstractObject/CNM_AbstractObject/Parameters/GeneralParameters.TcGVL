@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.8">
-  <GVL Name="GeneralParameters" Id="{1d604bea-df5e-43e9-a4ce-4d9e9265b1d5}">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <GVL Name="GeneralParameters" Id="{128c2646-df15-4351-befc-ad8068d85823}" ParameterList="True">
     <Declaration><![CDATA[(*
 
 ## Short summary

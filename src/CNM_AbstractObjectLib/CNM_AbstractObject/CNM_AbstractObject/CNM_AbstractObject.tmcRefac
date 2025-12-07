@@ -6,5 +6,10 @@
       <From>Parameters</From>
       <To>GeneralParameters</To>
     </RenamedType>
+    <RenamedType>
+      <Type guid="128c2646-df15-4351-befc-ad8068d85823">PARAM</Type>
+      <From>Param</From>
+      <To>GeneralParameters</To>
+    </RenamedType>
   </Renames>
 </Refactors>
